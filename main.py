@@ -510,8 +510,15 @@ import os
 
 app = FastAPI(title="CaseFlow AI - Tray Management API")
 
-# Configure CORS for production
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+# Configure CORS for production - Allow all origins for pilot
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
+    expose_headers=["*"]
+)
 
 # =========================
 # USER MANAGEMENT
