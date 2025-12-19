@@ -574,14 +574,6 @@ def get_current_user(username: str):
             raise HTTPException(404, "User not found")
         return user
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS if ALLOWED_ORIGINS != ["*"] else ["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-    allow_credentials=True,
-    expose_headers=["*"]
-)
 
 from sqlalchemy.pool import StaticPool
 
