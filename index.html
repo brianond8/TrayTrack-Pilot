@@ -1183,15 +1183,15 @@
     <script>
         // API Configuration
         const getApiUrl = () => {
-            // Development
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                return 'http://localhost:8000';
-            }
-            
-            // Production - check if we have a separate API domain
-            const API_DOMAIN = 'https://traytrack-api.onrender.com'; // UPDATE THIS after deployment
-            return API_DOMAIN;
-        };
+    // Development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return 'http://localhost:8000';
+    }
+    
+    // Production - use your actual Render backend URL
+    const API_DOMAIN = 'https://traytrack-pilot.onrender.com';
+    return API_DOMAIN;
+};
         
         const API_URL = getApiUrl();
         
