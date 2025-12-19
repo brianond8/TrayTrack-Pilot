@@ -77,7 +77,7 @@ class Tray(SQLModel, table=True):
 
 class TrayItem(SQLModel, table=True):
     id: Optional[int] = SAField(default=None, primary_key=True)
-    tray_id: int = SAField(foreign_key="tray.id", index=True)
+    tray_id: int = SAField(foreign_key="tray.id", index=True, ondelete="CASCADE")
     sku: str = SAField(index=True)
     name: str
     is_critical: bool = SAField(default=False)
@@ -96,7 +96,7 @@ class RestockTask(SQLModel, table=True):
     
 class RestockTaskItem(SQLModel, table=True):
     id: Optional[int] = SAField(default=None, primary_key=True)
-    task_id: int = SAField(foreign_key="restocktask.id", index=True)
+    task_id: int = SAField(foreign_key="restocktask.id", index=True, ondelete="CASCADE")
     item_id: int = SAField(foreign_key="trayitem.id", index=True)
     qty_missing: Optional[int] = None
     reason: Optional[str] = None
@@ -154,7 +154,7 @@ class Note(SQLModel, table=True):
 
 class NotePin(SQLModel, table=True):
     id: Optional[int] = SAField(default=None, primary_key=True)
-    note_id: int = SAField(foreign_key="note.id", index=True)
+    note_id: int = SAField(foreign_key="note.id", index=True, ondelete="CASCADE")
     entity_type: str = SAField(index=True)  # 'tray', 'case', 'doctor'
     entity_id: int = SAField(index=True)
     created_at: datetime = SAField(default_factory=lambda: datetime.now(timezone.utc), index=True)
@@ -512,60 +512,6 @@ app = FastAPI(title="CaseFlow AI - Tray Management API")
 
 # Configure CORS for production
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
-
-# =========================
-# USER MANAGEMENT
-# =========================
-
-class User(SQLModel, table=True):
-    id: Optional[int] = SAField(default=None, primary_key=True)
-    username: str = SAField(index=True, unique=True)
-    display_name: str
-    created_at: datetime = SAField(default_factory=lambda: datetime.now(timezone.utc))
-    last_active: Optional[datetime] = None
-
-class UserCreate(BaseModel):
-    username: str
-    display_name: str
-
-@app.post("/users/login")
-def login_user(user_data: UserCreate):
-    """Login or create user - no password for pilot"""
-    with Session(engine) as session:
-        # Check if user exists
-        existing = session.exec(
-            select(User).where(User.username == user_data.username.lower())
-        ).first()
-        
-        if existing:
-            # Update last active
-            existing.last_active = datetime.now(timezone.utc)
-            session.add(existing)
-            session.commit()
-            session.refresh(existing)
-            return existing
-        
-        # Create new user
-        new_user = User(
-            username=user_data.username.lower(),
-            display_name=user_data.display_name,
-            last_active=datetime.now(timezone.utc)
-        )
-        session.add(new_user)
-        session.commit()
-        session.refresh(new_user)
-        return new_user
-
-@app.get("/users/current/{username}")
-def get_current_user(username: str):
-    """Get user by username"""
-    with Session(engine) as session:
-        user = session.exec(
-            select(User).where(User.username == username.lower())
-        ).first()
-        if not user:
-            raise HTTPException(404, "User not found")
-        return user
 
 app.add_middleware(
     CORSMiddleware,
