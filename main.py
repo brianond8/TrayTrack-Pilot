@@ -651,7 +651,12 @@ def tray_to_out(session: Session, tray: Tray) -> TrayOut:
 
 @app.get("/healthz")
 def healthz():
-    return {"ok": True, "timestamp": datetime.now(timezone.utc).isoformat()}
+    return {
+        "ok": True,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "deploy_stamp": "cors_fix_1",  # change this string every deploy
+    }
+
 
 
 @app.get("/metadata/location-types")
