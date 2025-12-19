@@ -511,8 +511,6 @@ engine = create_engine(
     connect_args={"check_same_thread": False},
     poolclass=StaticPool
 )
-SQLModel.metadata.create_all(engine)
-
 # =========================
 # USER MANAGEMENT
 # =========================
@@ -524,9 +522,18 @@ class User(SQLModel, table=True):
     created_at: datetime = SAField(default_factory=lambda: datetime.now(timezone.utc))
     last_active: Optional[datetime] = None
 
+
 class UserCreate(BaseModel):
     username: str
     display_name: str
+
+
+# =========================
+# CREATE DATABASE TABLES
+# =========================
+
+SQLModel.metadata.create_all(engine)
+
 
 @app.post("/users/login")
 def login_user(user_data: UserCreate):
