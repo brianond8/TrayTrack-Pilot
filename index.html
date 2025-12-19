@@ -924,20 +924,55 @@
 
 </head>
 <body>
-    <div class="header">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div>
-                <h1>TrayTrack AI</h1>
-                <div class="user-info">Rep: <span id="userName">John Smith</span></div>
+    <!-- Login Screen -->
+    <div id="loginScreen" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; z-index: 10000;">
+        <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 400px; width: 90%;">
+            <div style="text-align: center; margin-bottom: 32px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🧳</div>
+                <h1 style="font-size: 28px; font-weight: 700; color: #1f2937; margin-bottom: 8px;">TrayTrack AI</h1>
+                <p style="font-size: 14px; color: #6b7280;">Medical Device Inventory Management</p>
             </div>
-            <div style="text-align: right;">
-                <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">v2.2-pilot</div>
-                <button onclick="showFeedbackForm()" style="background: #6366f1; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">💬 Feedback</button>
+            
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter your username" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px;" />
             </div>
+            
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">Display Name</label>
+                <input type="text" id="loginDisplayName" placeholder="Your full name" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px;" />
+            </div>
+            
+            <button onclick="handleLogin()" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);">
+                Continue
+            </button>
+            
+            <p style="margin-top: 20px; font-size: 12px; color: #9ca3af; text-align: center;">No password needed for pilot testing</p>
         </div>
     </div>
 
-<div class="tabs">
+    <!-- Main App (hidden until logged in) -->
+    <div id="mainApp" style="display: none;">
+        <div id="successMsg" class="success-msg">Success!</div>
+        <div id="errorMsg" class="error-msg">Error occurred</div>
+        
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <h1>TrayTrack AI</h1>
+                    <div class="user-info">
+                        <span id="userName">Loading...</span>
+                        <button onclick="handleLogout()" style="margin-left: 12px; padding: 4px 12px; background: transparent; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: white; font-size: 12px; cursor: pointer;">Logout</button>
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 11px; color: #9ca3af; margin-bottom: 4px;">v2.2-pilot</div>
+                    <button onclick="showFeedbackForm()" style="background: #6366f1; color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;">💬 Feedback</button>
+                </div>
+            </div>
+        </div>
+
+    <div class="tabs">
         <button class="tab active" onclick="showTab('dashboard')">Dashboard</button>
         <button class="tab" onclick="showTab('trays')">Trays & Products</button>
         <button class="tab" onclick="showTab('doctors')">Doctors</button>
@@ -1160,7 +1195,8 @@
         
         const API_URL = getApiUrl();
         
-        const USER_ID = 'rep001';
+        let USER_ID = null;
+        let CURRENT_USER = null;
         let currentTray = null;
         let allTrays = [];
         let allCases = [];
@@ -5731,12 +5767,102 @@ function showQuickAddPhotoOptions() {
             if (prompt) prompt.remove();
         };
         
-// =========================
-        // FIRST-TIME USER ONBOARDING
+        // =========================
+        // LOGIN/LOGOUT SYSTEM
         // =========================
 
+        async function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const displayName = document.getElementById('loginDisplayName').value.trim();
+            
+            if (!username) {
+                alert('Please enter a username');
+                return;
+            }
+            
+            if (!displayName) {
+                alert('Please enter your display name');
+                return;
+            }
+            
+            // Validate username (alphanumeric only)
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+                alert('Username can only contain letters, numbers, and underscores');
+                return;
+            }
+            
+            showLoading('Logging in...');
+            
+            try {
+                const response = await fetch(`${API_URL}/users/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, display_name: displayName })
+                });
+                
+                if (!response.ok) throw new Error('Login failed');
+                
+                CURRENT_USER = await response.json();
+                USER_ID = CURRENT_USER.username;
+                
+                // Save to localStorage
+                localStorage.setItem('traytrack_user', JSON.stringify(CURRENT_USER));
+                
+                // Hide login, show app
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('userName').textContent = CURRENT_USER.display_name;
+                
+                hideLoading();
+                loadDashboard();
+                
+                // Show welcome for first-time users
+                if (!localStorage.getItem('traytrack_welcome_seen_' + USER_ID)) {
+                    setTimeout(() => showWelcomeScreen(), 1000);
+                }
+            } catch (error) {
+                hideLoading();
+                alert('Login failed. Please try again.');
+                console.error(error);
+            }
+        }
+
+        function handleLogout() {
+            if (!confirm('Are you sure you want to logout?')) return;
+            
+            localStorage.removeItem('traytrack_user');
+            USER_ID = null;
+            CURRENT_USER = null;
+            
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginDisplayName').value = '';
+        }
+
+        // Check for existing login on page load
+        function checkExistingLogin() {
+            const savedUser = localStorage.getItem('traytrack_user');
+            if (savedUser) {
+                try {
+                    CURRENT_USER = JSON.parse(savedUser);
+                    USER_ID = CURRENT_USER.username;
+                    
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('userName').textContent = CURRENT_USER.display_name;
+                    
+                    loadDashboard();
+                } catch (error) {
+                    console.error('Failed to restore session:', error);
+                    localStorage.removeItem('traytrack_user');
+                }
+            }
+        }
+
         function checkFirstTimeUser() {
-            const hasSeenWelcome = localStorage.getItem('traytrack_welcome_seen');
+            if (!USER_ID) return;
+            const hasSeenWelcome = localStorage.getItem('traytrack_welcome_seen_' + USER_ID);
             if (!hasSeenWelcome) {
                 showWelcomeScreen();
             }
@@ -5785,7 +5911,7 @@ function showQuickAddPhotoOptions() {
         }
 
         window.closeWelcome = function() {
-            localStorage.setItem('traytrack_welcome_seen', 'true');
+            localStorage.setItem('traytrack_welcome_seen_' + USER_ID, 'true');
             const welcome = document.getElementById('welcomeScreen');
             if (welcome) welcome.remove();
         };
@@ -6103,11 +6229,7 @@ function showQuickAddPhotoOptions() {
         }
 
         // Initialize on page load
-        setTimeout(() => {
-            checkFirstTimeUser();
-        }, 1000);
-        
-        loadDashboard();
+        checkExistingLogin();
     
 // =========================
 // PHOTO FUNCTIONS
