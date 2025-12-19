@@ -1,0 +1,22 @@
+services:
+  # Backend API
+  - type: web
+    name: traytrack-api
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /healthz
+
+  # Frontend static site
+  - type: web
+    name: traytrack-app
+    env: static
+    buildCommand: ""
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html   

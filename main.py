@@ -411,34 +411,6 @@ class UploadPhotoIn(BaseModel):
     image_data: str  # Base64 encoded
     caption: Optional[str] = Field(default=None, max_length=200)
 
-class StandaloneItemOut(BaseModel):
-    id: int
-    user_id: str
-    name: str
-    item_type: str
-    sku: Optional[str]
-    status: TrayStatus
-    priority_numeric: Optional[int]
-    priority_partial: bool
-    color: str
-    qty_expected: Optional[int]
-    qty_on_hand: Optional[int]
-    is_critical: bool
-    last_seen_lat: Optional[float]
-    last_seen_lng: Optional[float]
-    last_seen_at: Optional[datetime]
-    last_location_type: Optional[LocationType]
-    last_location_name: Optional[str]
-    created_at: datetime
-
-
-class CreateStandaloneItemIn(BaseModel):
-    item_type: str = Field(min_length=1, max_length=50)
-    name: str = Field(min_length=1, max_length=200)
-    sku: Optional[str] = Field(default=None, max_length=50)
-    qty_expected: Optional[int] = Field(default=None, ge=0)
-    qty_on_hand: Optional[int] = Field(default=None, ge=0)
-    is_critical: bool = False
 
 # =========================
 # Priority & Color Logic

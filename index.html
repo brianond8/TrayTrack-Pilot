@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="TrayTrack">
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/icon-192.png">
+    <!-- <link rel="apple-touch-icon" href="/icon-192.png"> -->
     <title>TrayTrack - Medical Device Inventory</title>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/main.min.css' rel='stylesheet' />
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
@@ -1941,119 +1941,6 @@ function renderStandaloneCard(item) {
     `;
 }
 
-function renderTrayCard(tray) {
-    let statusLabel = 'No location set';
-    let statusClass = `status-${tray.status}`;
-    
-    if (tray.last_location_type) {
-        statusLabel = tray.last_location_type;
-        if (tray.last_location_name) {
-            statusLabel += ` - ${tray.last_location_name}`;
-        }
-    }
-    
-    let locationInfo = '';
-    if (tray.last_seen_at) {
-        const timestamp = tray.last_seen_at.endsWith('Z') ? tray.last_seen_at : tray.last_seen_at + 'Z';
-        const lastSeen = new Date(timestamp);
-        const now = new Date();
-        const diffMs = now - lastSeen;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const diffDays = Math.floor(diffHours / 24);
-        
-        let timeAgo = '';
-        if (diffDays > 0) {
-            timeAgo = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-        } else if (diffHours > 0) {
-            timeAgo = `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-        } else if (diffMins > 0) {
-            timeAgo = `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-        } else {
-            timeAgo = 'just now';
-        }
-        
-        locationInfo = `<div class="tray-location">📍 Dropped off ${timeAgo}</div>`;
-    }
-    
-    let priorityBadge = '';
-    if (tray.priority_numeric) {
-        priorityBadge = `<span class="tray-status" style="background:#ffebee;color:#c62828;">P${tray.priority_numeric}</span>`;
-    } else if (tray.priority_partial) {
-        priorityBadge = `<span class="tray-status" style="background:#e3f2fd;color:#1565c0;">Partial</span>`;
-    }
-    
-    return `
-        <div class="tray-card ${tray.color}" onclick="openTray(${tray.id})">
-            <div class="tray-name">${tray.name}</div>
-            <span class="tray-status ${statusClass}">
-                ${statusLabel}
-            </span>
-            ${priorityBadge}
-            ${tray.items && tray.items.length > 0 ? `<div style="margin-top:8px;font-size:14px;color:#86868b;">${tray.items.length} items</div>` : ''}
-            ${locationInfo}
-        </div>
-    `;
-}
-
-function renderStandaloneCard(item) {
-    let statusLabel = 'No location set';
-    let statusClass = `status-${item.status}`;
-    
-    if (item.last_location_type) {
-        statusLabel = item.last_location_type;
-        if (item.last_location_name) {
-            statusLabel += ` - ${item.last_location_name}`;
-        }
-    }
-    
-    let locationInfo = '';
-    if (item.last_seen_at) {
-        const timestamp = item.last_seen_at.endsWith('Z') ? item.last_seen_at : item.last_seen_at + 'Z';
-        const lastSeen = new Date(timestamp);
-        const now = new Date();
-        const diffMs = now - lastSeen;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const diffDays = Math.floor(diffHours / 24);
-        
-        let timeAgo = '';
-        if (diffDays > 0) {
-            timeAgo = `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
-        } else if (diffHours > 0) {
-            timeAgo = `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
-        } else if (diffMins > 0) {
-            timeAgo = `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
-        } else {
-            timeAgo = 'just now';
-        }
-        
-        locationInfo = `<div class="tray-location">📍 Dropped off ${timeAgo}</div>`;
-    }
-    
-    let priorityBadge = '';
-    if (item.priority_numeric) {
-        priorityBadge = `<span class="tray-status" style="background:#ffebee;color:#c62828;">P${item.priority_numeric}</span>`;
-    } else if (item.priority_partial) {
-        priorityBadge = `<span class="tray-status" style="background:#e3f2fd;color:#1565c0;">Partial</span>`;
-    }
-    
-    const stockInfo = item.qty_expected 
-        ? `${item.qty_on_hand || 0}/${item.qty_expected}` 
-        : 'No qty tracking';
-    
-    return `
-        <div class="tray-card ${item.color}" onclick="openStandaloneItem(${item.id})">
-            <div class="tray-name">${item.name}</div>
-            <span class="tray-status ${statusClass}">
-                ${statusLabel}
-            </span>
-            ${priorityBadge}
-            <div style="margin-top:8px;font-size:14px;color:#86868b;">Stock: ${stockInfo}</div>
-            ${locationInfo}
-        </div>
-    `;
-}
 
         async function openTray(trayId) {
             currentTray = allTrays.find(t => t.id === trayId);

@@ -1,32 +1,10 @@
 {
-  "name": "TrayTrack AI - Medical Device Inventory",
+  "name": "TrayTrack AI",
   "short_name": "TrayTrack",
-  "description": "Medical device inventory management system for surgical trays and standalone products",
+  "description": "Medical device inventory management",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#6366f1",
-  "orientation": "portrait-primary",
-  "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
-  "categories": ["medical", "productivity", "business"],
-  "screenshots": [
-    {
-      "src": "/screenshot1.png",
-      "sizes": "1170x2532",
-      "type": "image/png"
-    }
-  ]
+  "icons": []
 }
