@@ -520,6 +520,19 @@ app.add_middleware(
     expose_headers=["*"]
 )
 
+
+from sqlalchemy.pool import StaticPool
+
+# Use environment variable for database path in production
+DB_PATH = os.getenv("DATABASE_PATH", "caseflow.db")
+
+engine = create_engine(
+    f"sqlite:///{DB_PATH}",
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool
+)
+SQLModel.metadata.create_all(engine)
+
 # =========================
 # USER MANAGEMENT
 # =========================
@@ -573,20 +586,6 @@ def get_current_user(username: str):
         if not user:
             raise HTTPException(404, "User not found")
         return user
-
-
-from sqlalchemy.pool import StaticPool
-
-# Use environment variable for database path in production
-DB_PATH = os.getenv("DATABASE_PATH", "caseflow.db")
-
-engine = create_engine(
-    f"sqlite:///{DB_PATH}",
-    connect_args={"check_same_thread": False},
-    poolclass=StaticPool
-)
-SQLModel.metadata.create_all(engine)
-
 
 # =========================
 # Helper Functions
