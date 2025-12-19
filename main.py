@@ -77,7 +77,7 @@ class Tray(SQLModel, table=True):
 
 class TrayItem(SQLModel, table=True):
     id: Optional[int] = SAField(default=None, primary_key=True)
-    tray_id: int = SAField(foreign_key="tray.id", index=True, ondelete="CASCADE")
+    tray_id: int = SAField(foreign_key="tray.id", index=True)
     sku: str = SAField(index=True)
     name: str
     is_critical: bool = SAField(default=False)
@@ -96,7 +96,7 @@ class RestockTask(SQLModel, table=True):
     
 class RestockTaskItem(SQLModel, table=True):
     id: Optional[int] = SAField(default=None, primary_key=True)
-    task_id: int = SAField(foreign_key="restocktask.id", index=True, ondelete="CASCADE")
+    task_id: int = SAField(foreign_key="restocktask.id", index=True)
     item_id: int = SAField(foreign_key="trayitem.id", index=True)
     qty_missing: Optional[int] = None
     reason: Optional[str] = None
@@ -154,7 +154,7 @@ class Note(SQLModel, table=True):
 
 class NotePin(SQLModel, table=True):
     id: Optional[int] = SAField(default=None, primary_key=True)
-    note_id: int = SAField(foreign_key="note.id", index=True, ondelete="CASCADE")
+    note_id: int = SAField(foreign_key="note.id", index=True)
     entity_type: str = SAField(index=True)  # 'tray', 'case', 'doctor'
     entity_id: int = SAField(index=True)
     created_at: datetime = SAField(default_factory=lambda: datetime.now(timezone.utc), index=True)
