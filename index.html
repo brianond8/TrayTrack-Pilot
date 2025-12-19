@@ -36,6 +36,16 @@
         }
         
         /* Desktop: add padding to container elements */
+
+    /* Hide legacy success/error banner */
+.status,
+.status-message,
+.toast,
+.notification,
+.alert {
+  display: none !important;
+}
+
 @media (min-width: 768px) {
     .header,
     #traysTab > div:first-child,
