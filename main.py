@@ -482,15 +482,23 @@ import os
 
 app = FastAPI(title="CaseFlow AI - Tray Management API")
 
-# Configure CORS for production - Allow all origins for pilot
+ALLOWED_ORIGINS = [
+    "https://traytrack-pilot-1.onrender.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:5500",
+    "http://localhost:5173",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_credentials=True,
-    expose_headers=["*"]
 )
+
+
+
 
 
 from sqlalchemy.pool import StaticPool
