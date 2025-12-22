@@ -5389,8 +5389,13 @@ function showQuickAddPhotoOptions() {
                     .then(registration => {
                         console.log('ServiceWorker registered:', registration);
                         
-                        // Force update check
+                        // Force update check immediately
                         registration.update();
+                        
+                        // Check for updates every 60 seconds
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000);
                         
                         // Request persistent storage
                         if (navigator.storage && navigator.storage.persist) {
@@ -5878,6 +5883,31 @@ function showQuickAddPhotoOptions() {
                 }
             }
         }
+        
+        // Force check for new version on load
+        function checkForUpdates() {
+            const currentVersion = '2.4-pilot';
+            const lastKnownVersion = localStorage.getItem('traytrack_version');
+            
+            if (lastKnownVersion && lastKnownVersion !== currentVersion) {
+                console.log('New version detected, forcing refresh...');
+                localStorage.setItem('traytrack_version', currentVersion);
+                
+                // Clear service worker cache
+                if ('serviceWorker' in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(registrations => {
+                        registrations.forEach(registration => {
+                            registration.unregister();
+                        });
+                    });
+                }
+                
+                // Force reload without cache
+                window.location.reload(true);
+            } else {
+                localStorage.setItem('traytrack_version', currentVersion);
+            }
+        }
 
         function checkFirstTimeUser() {
             if (!USER_ID) return;
@@ -6262,8 +6292,9 @@ function showQuickAddPhotoOptions() {
         }
 
         // Initialize on page load
+        checkForUpdates();
         checkExistingLogin();
-    
+
 // =========================
 // PHOTO FUNCTIONS
 // =========================

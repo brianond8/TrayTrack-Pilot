@@ -661,7 +661,8 @@ def healthz():
     return {
         "ok": True,
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "deploy_stamp": "cors_fix_1",  # change this string every deploy
+        "version": "2.3-pilot",
+        "deploy_stamp": "v2.4_deploy_1",  # change this string every deploy
     }
 
 
