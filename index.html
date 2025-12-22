@@ -330,13 +330,13 @@
             background: rgba(0,0,0,0.5);
             z-index: 1000;
             overflow-y: auto;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
         }
         
         .modal.show {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
             animation: fadeIn 0.2s ease;
         }
         
@@ -355,9 +355,16 @@
             overflow-y: auto;
             overflow-x: hidden;
             box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-            animation: slideUp 0.2s ease;
+            animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+        }
+        
+        .modal.show .modal-content {
+            opacity: 1;
+            transform: translateY(0) scale(1);
         }
         
         @media (min-width: 768px) {
@@ -373,11 +380,11 @@
         @keyframes slideUp {
             from { 
                 opacity: 0;
-                transform: translateY(16px);
+                transform: translateY(20px) scale(0.95);
             }
             to { 
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
             }
         }
         
@@ -470,16 +477,18 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 10px;
-            transition: all 0.2s ease;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             -webkit-tap-highlight-color: transparent;
             min-height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transform: translateY(0);
         }
         
         .btn:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
         
         .btn-primary {
@@ -3431,10 +3440,24 @@ async function addStandaloneItem() {
 }
 
         function closeModal() {
-            document.getElementById('trayModal').classList.remove('show');
-            document.getElementById('caseModal').classList.remove('show');
-            document.getElementById('billingNotesModal').classList.remove('show');
-            currentTray = null;
+            const trayModal = document.getElementById('trayModal');
+            const caseModal = document.getElementById('caseModal');
+            const billingModal = document.getElementById('billingNotesModal');
+            
+            // Add fade-out animation
+            trayModal.style.opacity = '0';
+            caseModal.style.opacity = '0';
+            billingModal.style.opacity = '0';
+            
+            setTimeout(() => {
+                trayModal.classList.remove('show');
+                caseModal.classList.remove('show');
+                billingModal.classList.remove('show');
+                trayModal.style.opacity = '';
+                caseModal.style.opacity = '';
+                billingModal.style.opacity = '';
+                currentTray = null;
+            }, 200);
         }
 
         async function getGPS() {
@@ -4089,7 +4112,7 @@ async function addStandaloneItem() {
         <div style="margin-bottom: 16px;">
             <p style="font-size: 14px; color: #86868b; margin-bottom: 16px;">What would you like to add?</p>
             
-            <button class="btn btn-primary" onclick="createNewBillingNote()" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <button class="btn btn-primary" onclick="closeModal(); setTimeout(createNewBillingNote, 250);" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
                 <span style="font-size: 20px;">📝</span>
                 <span>Create Note</span>
             </button>
@@ -4116,7 +4139,7 @@ function showQuickAddPhotoOptions() {
                 <div style="font-weight: 600; margin-bottom: 8px; color: #6366f1;">🧳 Trays</div>
                 <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
                     ${allTrays.map(tray => `
-                        <div onclick="showAddPhotoOptions('tray', ${tray.id}); closeModal();" style="padding: 12px; border-bottom: 1px solid #f5f5f7; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='white'">
+                        <div onclick="selectEntityForPhoto('tray', ${tray.id})" style="padding: 12px; border-bottom: 1px solid #f5f5f7; cursor: pointer; display: flex; align-items: center; justify-content: space-between;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='white'">
                             <span>${tray.name}</span>
                             <span style="font-size: 12px; color: #86868b;">${tray.items.length} items</span>
                         </div>
@@ -4141,7 +4164,7 @@ function showQuickAddPhotoOptions() {
                             const caseDate = new Date(c.case_date);
                             const dateStr = caseDate.toLocaleDateString();
                             return `
-                                <div onclick="showAddPhotoOptions('case', ${c.id}); closeModal();" style="padding: 12px; border-bottom: 1px solid #f5f5f7; cursor: pointer;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='white'">
+                                <div onclick="selectEntityForPhoto('case', ${c.id})" style="padding: 12px; border-bottom: 1px solid #f5f5f7; cursor: pointer;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='white'">
                                     <div style="font-weight: 500;">${c.procedure}</div>
                                     <div style="font-size: 12px; color: #86868b;">${dateStr} • ${c.location}</div>
                                 </div>
@@ -4153,17 +4176,34 @@ function showQuickAddPhotoOptions() {
         }
     }
     
-    if (!traysHtml && !casesHtml) {
+    let standalonesHtml = '';
+    if (allStandaloneItems && allStandaloneItems.length > 0) {
+        standalonesHtml = `
+            <div style="margin-bottom: 16px;">
+                <div style="font-weight: 600; margin-bottom: 8px; color: #6366f1;">📦 Standalone Items</div>
+                <div style="max-height: 200px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+                    ${allStandaloneItems.map(item => `
+                        <div onclick="selectEntityForPhoto('standalone', ${item.id})" style="padding: 12px; border-bottom: 1px solid #f5f5f7; cursor: pointer;" onmouseover="this.style.background='#f5f5f7'" onmouseout="this.style.background='white'">
+                            <span>${item.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    if (!traysHtml && !casesHtml && !standalonesHtml) {
         document.getElementById('modalContent').innerHTML = `
             <div style="text-align: center; padding: 20px; color: #86868b;">
-                No trays or cases available to add photos to.
+                No trays, cases, or standalone items available to add photos to.
             </div>
             <button class="btn btn-secondary" onclick="showQuickAddOptions()">Back</button>
         `;
     } else {
         document.getElementById('modalContent').innerHTML = `
-            <p style="font-size: 14px; color: #86868b; margin-bottom: 16px;">Select a tray or case to add a photo:</p>
+            <p style="font-size: 14px; color: #86868b; margin-bottom: 16px;">Select where to add a photo:</p>
             ${traysHtml}
+            ${standalonesHtml}
             ${casesHtml}
             <button class="btn btn-secondary" onclick="showQuickAddOptions()">Back</button>
         `;
@@ -6130,10 +6170,14 @@ function showQuickAddPhotoOptions() {
 // PHOTO FUNCTIONS
 // =========================
 
+function selectEntityForPhoto(entityType, entityId) {
+    // Store the entity info and show photo options
+    showAddPhotoOptions(entityType, entityId);
+}
+
 function showAddPhotoOptions(entityType, entityId) {
-    const targetModal = entityType === 'tray' ? 'modalContent' : 'caseModalContent';
-    
-    document.getElementById(targetModal).innerHTML = `
+    // Always use modalContent for the tray modal
+    document.getElementById('modalContent').innerHTML = `
         <div style="margin-bottom: 16px;">
             <p style="font-size: 14px; color: #86868b; margin-bottom: 16px;">Choose how to add a photo:</p>
             <input type="file" id="photoInput" accept="image/*" capture="environment" style="display: none;" onchange="handlePhotoSelected('${entityType}', ${entityId})">
@@ -6216,13 +6260,22 @@ function viewPhoto(photoId, entityType, entityId) {
             
             const createdDate = new Date(photo.created_at).toLocaleString();
             
+            let backButton;
+            if (entityType === 'tray') {
+                backButton = `openTray(${entityId})`;
+            } else if (entityType === 'standalone') {
+                backButton = `openStandaloneItem(${entityId})`;
+            } else {
+                backButton = `showCaseDetailsById(${entityId})`;
+            }
+            
             document.getElementById('modalContent').innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <img src="${photo.image_data}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; margin-bottom: 12px;">
                     ${photo.caption ? `<div style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">${photo.caption}</div>` : ''}
                     <div style="font-size: 12px; color: #86868b; margin-bottom: 16px;">Added ${createdDate}</div>
                     <button class="btn btn-primary" style="background: #ff3b30;" onclick="deletePhoto(${photoId}, '${entityType}', ${entityId})">Delete Photo</button>
-                    <button class="btn btn-secondary" onclick="${entityType === 'tray' ? `openTray(${entityId})` : `showCaseDetailsById(${entityId})`}">Back</button>
+                    <button class="btn btn-secondary" onclick="${backButton}">Back</button>
                 </div>
             `;
         });
@@ -6243,6 +6296,8 @@ async function deletePhoto(photoId, entityType, entityId) {
         // Return to entity view
         if (entityType === 'tray') {
             await openTray(entityId);
+        } else if (entityType === 'standalone') {
+            await openStandaloneItem(entityId);
         } else if (entityType === 'case') {
             await showCaseDetailsById(entityId);
         }

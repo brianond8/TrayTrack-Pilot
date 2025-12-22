@@ -1305,18 +1305,18 @@ def delete_doctor(doctor_id: int):
     try:
         with Session(engine) as session:
             doctor = session.get(Doctor, doctor_id)
-        if not doctor or doctor.user_id != USER_ID:
-            raise HTTPException(404, "Doctor not found")
+            if not doctor or doctor.user_id != USER_ID:
+                raise HTTPException(404, "Doctor not found")
 
-        # Delete all note pins associated with this doctor
-        pins = session.exec(
-            select(NotePin).where(
-                NotePin.entity_type == "doctor",
-                NotePin.entity_id == doctor_id
-            )
-        ).all()
-        for pin in pins:
-            session.delete(pin)
+            # Delete all note pins associated with this doctor
+            pins = session.exec(
+                select(NotePin).where(
+                    NotePin.entity_type == "doctor",
+                    NotePin.entity_id == doctor_id
+                )
+            ).all()
+            for pin in pins:
+                session.delete(pin)
 
             session.delete(doctor)
             session.commit()
@@ -1380,43 +1380,37 @@ def create_note(payload: CreateNoteIn):
     try:
         with Session(engine) as session:
             note = Note(
-            user_id=USER_ID,
-            title=payload.title,
-            content=payload.content,
-        )
-        session.add(note)
-        session.commit()
-        session.refresh(note)
+                user_id=USER_ID,
+                title=payload.title,
+                content=payload.content,
+            )
+            session.add(note)
+            session.commit()
+            session.refresh(note)
 
-        # Add pins
-        if payload.pin_to_trays:
-            for tray_id in payload.pin_to_trays:
-                pin = NotePin(note_id=note.id, entity_type="tray", entity_id=tray_id)
-                session.add(pin)
+            # Add pins
+            if payload.pin_to_trays:
+                for tray_id in payload.pin_to_trays:
+                    pin = NotePin(note_id=note.id, entity_type="tray", entity_id=tray_id)
+                    session.add(pin)
 
-        if payload.pin_to_standalone:
-            for item_id in payload.pin_to_standalone:
-                pin = NotePin(note_id=note.id, entity_type="standalone", entity_id=item_id)
-                session.add(pin)
+            if payload.pin_to_standalone:
+                for item_id in payload.pin_to_standalone:
+                    pin = NotePin(note_id=note.id, entity_type="standalone", entity_id=item_id)
+                    session.add(pin)
 
-        if payload.pin_to_cases:
-            for case_id in payload.pin_to_cases:
-                pin = NotePin(note_id=note.id, entity_type="case", entity_id=case_id)
-                session.add(pin)
+            if payload.pin_to_cases:
+                for case_id in payload.pin_to_cases:
+                    pin = NotePin(note_id=note.id, entity_type="case", entity_id=case_id)
+                    session.add(pin)
 
-        if payload.pin_to_doctors:
-            for doctor_id in payload.pin_to_doctors:
-                pin = NotePin(note_id=note.id, entity_type="doctor", entity_id=doctor_id)
-                session.add(pin)
+            if payload.pin_to_doctors:
+                for doctor_id in payload.pin_to_doctors:
+                    pin = NotePin(note_id=note.id, entity_type="doctor", entity_id=doctor_id)
+                    session.add(pin)
 
-        session.commit()
-        return note_to_out(session, note)
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(500, f"Failed to create note: {str(e)}")
-    except Exception as e:
-        raise HTTPException(500, f"Failed to create note: {str(e)}")
+            session.commit()
+            return note_to_out(session, note)
     except HTTPException:
         raise
     except Exception as e:
@@ -1615,27 +1609,6 @@ def get_doctor_notes(doctor_id: int):
 
         return notes
     
-@app.get("/standalone-items/{item_id}/notes", response_model=list[NoteOut])
-def get_standalone_notes(item_id: int):
-    with Session(engine) as session:
-        item = session.get(StandaloneItem, item_id)
-        if not item or item.user_id != USER_ID:
-            raise HTTPException(404, "Standalone item not found")
-
-        pins = session.exec(
-            select(NotePin).where(
-                NotePin.entity_type == "standalone",
-                NotePin.entity_id == item_id
-            )
-        ).all()
-
-        notes = []
-        for pin in pins:
-            note = session.get(Note, pin.note_id)
-            if note and note.user_id == USER_ID:
-                notes.append(note_to_out(session, note))
-
-        return notes
     
 @app.get("/standalone-items/{item_id}/notes", response_model=list[NoteOut])
 def get_standalone_notes(item_id: int):
