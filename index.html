@@ -1966,7 +1966,11 @@ function renderStandaloneCard(item) {
             currentTray = allTrays.find(t => t.id === trayId);
             if (!currentTray) return;
         
-            document.getElementById('modalTrayName').textContent = currentTray.name;
+            // Pre-build content before showing modal
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = currentTray.name;
             
             // Get pinned notes for this tray
             let pinnedNotes = [];
@@ -2041,7 +2045,7 @@ function renderStandaloneCard(item) {
                   `).join('') + '</div></div>'
                 : '';
 
-            document.getElementById('modalContent').innerHTML = `
+            modalContent.innerHTML = `
                 <div style="margin-bottom: 16px; padding: 12px; background: #f5f5f7; border-radius: 8px;">
                     <div style="font-size: 14px; color: #86868b;">Status</div>
                     <div style="font-size: 16px; font-weight: 500; margin-top: 4px;">
@@ -2059,7 +2063,10 @@ function renderStandaloneCard(item) {
                 <button class="btn btn-secondary" onclick="closeModal()">Close</button>
             `;
             
-            document.getElementById('trayModal').classList.add('show');
+            // Show modal after content is ready
+            requestAnimationFrame(() => {
+                document.getElementById('trayModal').classList.add('show');
+            });
         }
 
         async function openStandaloneItem(itemId) {
@@ -2138,8 +2145,11 @@ function renderStandaloneCard(item) {
           `).join('') + '</div></div>'
         : '';
     
-    document.getElementById('modalTrayName').textContent = item.name;
-    document.getElementById('modalContent').innerHTML = `
+    const modalTrayName = document.getElementById('modalTrayName');
+    const modalContent = document.getElementById('modalContent');
+    
+    modalTrayName.textContent = item.name;
+    modalContent.innerHTML = `
         <div style="margin-bottom: 16px; padding: 12px; background: #f5f5f7; border-radius: 8px;">
             <div style="font-size: 14px; color: #86868b;">Status</div>
             <div style="font-size: 16px; font-weight: 500; margin-top: 4px;">
@@ -2162,14 +2172,18 @@ function renderStandaloneCard(item) {
         <button class="btn btn-secondary" onclick="closeModal()">Close</button>
     `;
     
-    document.getElementById('trayModal').classList.add('show');
+    // Show modal after content is ready
+    requestAnimationFrame(() => {
+        document.getElementById('trayModal').classList.add('show');
+    });
 }
 
 function showDropoffFormStandalone(itemId) {
     const item = allStandaloneItems.find(i => i.id === itemId);
     if (!item) return;
     
-    document.getElementById('modalContent').innerHTML = `
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
         <div class="form-group">
             <label class="form-label">Location Type</label>
             <select id="locationType" class="form-select" onchange="updateLocationFieldRequirement()">
@@ -2247,7 +2261,8 @@ function showInventoryCheckFormStandalone(itemId) {
     const currentStock = item.qty_on_hand !== null ? item.qty_on_hand : 0;
     const expectedStock = item.qty_expected !== null ? item.qty_expected : '?';
     
-    document.getElementById('modalContent').innerHTML = `
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
         <p style="margin-bottom: 16px; font-size: 14px; color: #86868b;">
             Current stock: ${currentStock}/${expectedStock}
         </p>
@@ -2326,7 +2341,8 @@ function showRestockFormStandalone(itemId) {
     const currentLocation = item.last_location_type || 'Hospital';
     const currentLocationName = item.last_location_name || '';
     
-    document.getElementById('modalContent').innerHTML = `
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
         <p style="margin-bottom: 16px;">Choose restock type:</p>
         <div class="form-group">
             <label class="form-label">Update Location *</label>
@@ -2386,7 +2402,8 @@ function showPartialRestockFormStandalone(itemId) {
     const expectedStock = item.qty_expected || 0;
     const maxRestock = Math.max(0, expectedStock - currentStock);
     
-    document.getElementById('modalContent').innerHTML = `
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
         <p style="margin-bottom: 16px; font-size: 14px; color: #86868b;">
             Current stock: ${currentStock}/${expectedStock}
         </p>
@@ -2688,7 +2705,8 @@ async function submitPartialRestockStandalone(itemId, currentStock, expectedStoc
         }
 
         function showDropoffForm() {
-            document.getElementById('modalContent').innerHTML = `
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
                 <div class="form-group">
                     <label class="form-label">Location Type</label>
                     <select id="locationType" class="form-select" onchange="updateLocationFieldRequirement()">
@@ -2862,7 +2880,8 @@ async function submitPartialRestockStandalone(itemId, currentStock, expectedStoc
     `;
     }).join('');
     
-    document.getElementById('modalContent').innerHTML = `
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
         <p style="margin-bottom: 16px; font-size: 14px; color: #86868b;">
             Select items that need restocking and enter quantity used:
         </p>
@@ -2895,7 +2914,6 @@ async function submitPartialRestockStandalone(itemId, currentStock, expectedStoc
         <button class="btn btn-secondary" onclick="openTray(${currentTray.id})">Back</button>
     `;
 }
-
 function toggleQtyInput(itemId) {
     const checkbox = document.getElementById(`item_${itemId}`);
     const qtyContainer = document.getElementById(`qty_container_${itemId}`);
@@ -2977,7 +2995,8 @@ function toggleQtyInput(itemId) {
             const currentLocation = currentTray.last_location_type || 'Hospital';
             const currentLocationName = currentTray.last_location_name || '';
             
-            document.getElementById('modalContent').innerHTML = `
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
                 <p style="margin-bottom: 16px;">Choose restock type:</p>
                 <div class="form-group">
                     <label class="form-label">Update Location *</label>
@@ -3058,7 +3077,8 @@ function toggleQtyInput(itemId) {
             `;
             }).join('');
             
-            document.getElementById('modalContent').innerHTML = `
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
                 <p style="margin-bottom: 16px; font-size: 14px; color: #86868b;">
                     Select items you restocked and enter quantity added:
                 </p>
@@ -3703,8 +3723,11 @@ async function addStandaloneItem() {
                 const response = await fetch(`${API_URL}/trays`);
                 const trays = await response.json();
                 
-                document.getElementById('modalTrayName').textContent = 'Book a Case';
-                document.getElementById('modalContent').innerHTML = `
+                const modalTrayName = document.getElementById('modalTrayName');
+                const modalContent = document.getElementById('modalContent');
+                
+                modalTrayName.textContent = 'Book a Case';
+                modalContent.innerHTML = `
                     <div class="form-group">
                         <label class="form-label">Procedure *</label>
                         <input type="text" id="caseProcedure" class="form-input" placeholder="e.g., Spinal Fusion">
@@ -3747,7 +3770,10 @@ async function addStandaloneItem() {
                     }
                 });
                 
-                document.getElementById('trayModal').classList.add('show');
+                // Show modal after content is ready
+                requestAnimationFrame(() => {
+                    document.getElementById('trayModal').classList.add('show');
+                });
             } catch (error) {
                 showError('Failed to load booking form');
                 console.error(error);
@@ -3917,7 +3943,8 @@ async function addStandaloneItem() {
           `).join('') + '</div></div>'
         : '';
     
-    document.getElementById('caseModalContent').innerHTML = `
+    const caseModalContent = document.getElementById('caseModalContent');
+                caseModalContent.innerHTML = `
         <div class="detail-row">
             <div class="detail-label">Procedure</div>
             <div class="detail-value">${event.title}</div>
@@ -3947,7 +3974,10 @@ async function addStandaloneItem() {
         <button class="btn btn-secondary" onclick="closeModal()">Close</button>
     `;
     
-    document.getElementById('caseModal').classList.add('show');
+    // Show modal after content is ready
+    requestAnimationFrame(() => {
+        document.getElementById('caseModal').classList.add('show');
+    });
 }
 
         async function deleteCaseFromModal(caseId) {
@@ -4110,8 +4140,11 @@ async function addStandaloneItem() {
         }
 
         function showQuickAddOptions() {
-    document.getElementById('modalTrayName').textContent = 'Quick Add';
-    document.getElementById('modalContent').innerHTML = `
+    const modalTrayName = document.getElementById('modalTrayName');
+    const modalContent = document.getElementById('modalContent');
+    
+    modalTrayName.textContent = 'Quick Add';
+    modalContent.innerHTML = `
         <div style="margin-bottom: 16px;">
             <p style="font-size: 14px; color: #86868b; margin-bottom: 16px;">What would you like to add?</p>
             
@@ -4128,11 +4161,18 @@ async function addStandaloneItem() {
             <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
         </div>
     `;
-    document.getElementById('trayModal').classList.add('show');
+    
+    // Show modal after content is ready
+    requestAnimationFrame(() => {
+        document.getElementById('trayModal').classList.add('show');
+    });
 }
 
 function showQuickAddPhotoOptions() {
-    document.getElementById('modalTrayName').textContent = 'Add Photo To...';
+    const modalTrayName = document.getElementById('modalTrayName');
+    const modalContent = document.getElementById('modalContent');
+    
+    modalTrayName.textContent = 'Add Photo To...';
     
     // Build options for trays and cases
     let traysHtml = '';
@@ -4196,14 +4236,14 @@ function showQuickAddPhotoOptions() {
     }
     
     if (!traysHtml && !casesHtml && !standalonesHtml) {
-        document.getElementById('modalContent').innerHTML = `
+        modalContent.innerHTML = `
             <div style="text-align: center; padding: 20px; color: #86868b;">
                 No trays, cases, or standalone items available to add photos to.
             </div>
             <button class="btn btn-secondary" onclick="showQuickAddOptions()">Back</button>
         `;
     } else {
-        document.getElementById('modalContent').innerHTML = `
+        modalContent.innerHTML = `
             <p style="font-size: 14px; color: #86868b; margin-bottom: 16px;">Select where to add a photo:</p>
             ${traysHtml}
             ${standalonesHtml}
@@ -4396,8 +4436,11 @@ function showQuickAddPhotoOptions() {
         }
 
         function showCreateDoctorForm() {
-            document.getElementById('modalTrayName').textContent = 'Add Doctor';
-            document.getElementById('modalContent').innerHTML = `
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = 'Add Doctor';
+            modalContent.innerHTML = `
                 <div class="form-group">
                     <label class="form-label">Name *</label>
                     <input type="text" id="doctorName" class="form-input" placeholder="Dr. John Smith">
@@ -4421,7 +4464,11 @@ function showQuickAddPhotoOptions() {
                 <button class="btn btn-primary" onclick="createDoctor()">Add Doctor</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
             `;
-            document.getElementById('trayModal').classList.add('show');
+            
+            // Show modal after content is ready
+            requestAnimationFrame(() => {
+                document.getElementById('trayModal').classList.add('show');
+            });
         }
 
         async function createDoctor() {
@@ -4480,8 +4527,11 @@ function showQuickAddPhotoOptions() {
                   `).join('') + '</div>'
                 : '';
 
-            document.getElementById('modalTrayName').textContent = doctor.name;
-            document.getElementById('modalContent').innerHTML = `
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = doctor.name;
+            modalContent.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     ${doctor.specialty ? `<div style="color: #6366f1; font-size: 16px; margin-bottom: 8px;">${doctor.specialty}</div>` : ''}
                     ${doctor.hospital ? `<div style="font-size: 14px; color: #6b7280; margin-bottom: 4px;">🏥 ${doctor.hospital}</div>` : ''}
@@ -4493,15 +4543,22 @@ function showQuickAddPhotoOptions() {
                 <button class="btn btn-primary" style="background: #ff3b30;" onclick="deleteDoctor(${doctorId})">Delete</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Close</button>
             `;
-            document.getElementById('trayModal').classList.add('show');
+            
+            // Show modal after content is ready
+            requestAnimationFrame(() => {
+                document.getElementById('trayModal').classList.add('show');
+            });
         }
 
         function showEditDoctorForm(doctorId) {
             const doctor = allDoctors.find(d => d.id === doctorId);
             if (!doctor) return;
 
-            document.getElementById('modalTrayName').textContent = 'Edit Doctor';
-            document.getElementById('modalContent').innerHTML = `
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = 'Edit Doctor';
+            modalContent.innerHTML = `
                 <div class="form-group">
                     <label class="form-label">Name *</label>
                     <input type="text" id="doctorName" class="form-input" value="${doctor.name}">
@@ -4786,8 +4843,11 @@ function showQuickAddPhotoOptions() {
                 </div>
             `;
 
-            document.getElementById('modalTrayName').textContent = 'Create Note';
-            document.getElementById('modalContent').innerHTML = `
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = 'Create Note';
+            modalContent.innerHTML = `
                 <div class="form-group">
                     <label class="form-label">Title *</label>
                     <input type="text" id="noteTitle" class="form-input" placeholder="Note title">
@@ -4800,7 +4860,11 @@ function showQuickAddPhotoOptions() {
                 <button class="btn btn-primary" onclick="createNote()">Create Note</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
             `;
-            document.getElementById('trayModal').classList.add('show');
+            
+            // Show modal after content is ready
+            requestAnimationFrame(() => {
+                document.getElementById('trayModal').classList.add('show');
+            });
         }
 
         async function createNote() {
@@ -4872,8 +4936,11 @@ function showQuickAddPhotoOptions() {
                   '</div></div>'
                 : '<div style="margin-top: 16px; color: #86868b;">Not pinned to anything</div>';
 
-            document.getElementById('modalTrayName').textContent = note.title;
-            document.getElementById('modalContent').innerHTML = `
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = note.title;
+            modalContent.innerHTML = `
                 <div style="margin-bottom: 16px; white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #374151;">
                     ${note.content}
                 </div>
@@ -4886,15 +4953,22 @@ function showQuickAddPhotoOptions() {
                 <button class="btn btn-primary" style="background: #ff3b30;" onclick="deleteNote(${noteId})">Delete</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Close</button>
             `;
-            document.getElementById('trayModal').classList.add('show');
+            
+            // Show modal after content is ready
+            requestAnimationFrame(() => {
+                document.getElementById('trayModal').classList.add('show');
+            });
         }
 
         function showEditNoteForm(noteId) {
             const note = allNotes.find(n => n.id === noteId);
             if (!note) return;
 
-            document.getElementById('modalTrayName').textContent = 'Edit Note';
-            document.getElementById('modalContent').innerHTML = `
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = 'Edit Note';
+            modalContent.innerHTML = `
                 <div class="form-group">
                     <label class="form-label">Title *</label>
                     <input type="text" id="noteTitle" class="form-input" value="${note.title}">
@@ -5054,8 +5128,11 @@ function showQuickAddPhotoOptions() {
                 </div>
             `;
 
-            document.getElementById('modalTrayName').textContent = 'Manage Pins';
-            document.getElementById('modalContent').innerHTML = `
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = 'Manage Pins';
+            modalContent.innerHTML = `
                 <p style="margin-bottom: 16px; font-size: 14px; color: #86868b;">Add new pins to this note:</p>
                 ${pinToHtml}
                 <button class="btn btn-primary" onclick="addPinsToNote(${noteId})">Add Selected Pins</button>
@@ -5863,8 +5940,11 @@ function showQuickAddPhotoOptions() {
         // =========================
 
         window.showFeedbackForm = function() {
-            document.getElementById('modalTrayName').textContent = 'Send Feedback';
-            document.getElementById('modalContent').innerHTML = `
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = 'Send Feedback';
+            modalContent.innerHTML = `
                 <p style="margin-bottom: 16px; font-size: 14px; color: #6b7280;">
                     Help us improve TrayTrack! Share your thoughts, report issues, or suggest features.
                 </p>
@@ -5887,7 +5967,11 @@ function showQuickAddPhotoOptions() {
                 <button class="btn btn-primary" onclick="submitFeedback()">Send Feedback</button>
                 <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
             `;
-            document.getElementById('trayModal').classList.add('show');
+            
+            // Show modal after content is ready
+            requestAnimationFrame(() => {
+                document.getElementById('trayModal').classList.add('show');
+            });
         };
 
         window.submitFeedback = function() {
@@ -6127,8 +6211,11 @@ function showQuickAddPhotoOptions() {
             const upcomingCases = allCases.filter(c => new Date(c.case_date) > new Date()).length;
             const needsRestock = allTrays.filter(t => t.status === 'needs_restock').length;
             
-            document.getElementById('modalTrayName').textContent = 'Data Statistics';
-            document.getElementById('modalContent').innerHTML = `
+            const modalTrayName = document.getElementById('modalTrayName');
+            const modalContent = document.getElementById('modalContent');
+            
+            modalTrayName.textContent = 'Data Statistics';
+            modalContent.innerHTML = `
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 16px;">
                     <div style="background: #f9fafb; padding: 16px; border-radius: 8px; text-align: center;">
                         <div style="font-size: 32px; font-weight: 700; color: #6366f1;">${stats.trays}</div>
@@ -6167,7 +6254,11 @@ function showQuickAddPhotoOptions() {
                 
                 <button class="btn btn-secondary" onclick="closeModal()">Close</button>
             `;
-            document.getElementById('trayModal').classList.add('show');
+            
+            // Show modal after content is ready
+            requestAnimationFrame(() => {
+                document.getElementById('trayModal').classList.add('show');
+            });
         }
 
         // Initialize on page load
@@ -6184,7 +6275,8 @@ function selectEntityForPhoto(entityType, entityId) {
 
 function showAddPhotoOptions(entityType, entityId) {
     // Always use modalContent for the tray modal
-    document.getElementById('modalContent').innerHTML = `
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
         <div style="margin-bottom: 16px;">
             <p style="font-size: 14px; color: #86868b; margin-bottom: 16px;">Choose how to add a photo:</p>
             <input type="file" id="photoInput" accept="image/*" capture="environment" style="display: none;" onchange="handlePhotoSelected('${entityType}', ${entityId})">
@@ -6209,7 +6301,8 @@ async function handlePhotoSelected(entityType, entityId) {
     reader.onload = function(e) {
         const base64Data = e.target.result;
         
-        document.getElementById('modalContent').innerHTML = `
+        const modalContent = document.getElementById('modalContent');
+        modalContent.innerHTML = `
             <div style="margin-bottom: 16px;">
                 <img src="${base64Data}" style="width: 100%; max-height: 300px; object-fit: contain; border-radius: 8px; margin-bottom: 12px;">
                 <div class="form-group">
@@ -6276,7 +6369,8 @@ function viewPhoto(photoId, entityType, entityId) {
                 backButton = `showCaseDetailsById(${entityId})`;
             }
             
-            document.getElementById('modalContent').innerHTML = `
+            const modalContent = document.getElementById('modalContent');
+            modalContent.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <img src="${photo.image_data}" style="width: 100%; max-height: 400px; object-fit: contain; border-radius: 8px; margin-bottom: 12px;">
                     ${photo.caption ? `<div style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">${photo.caption}</div>` : ''}
